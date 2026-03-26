@@ -96,13 +96,25 @@ class Database:
             return False
 
     def get_equipment(self, category=None):
-        if category and category != 'Все':
-            self.cursor.execute('''
-                SELECT * FROM equipment WHERE category = ? AND stock > 0
-            ''', (category,))
-        else:
-            self.cursor.execute('SELECT * FROM equipment WHERE stock > 0')
-        return self.cursor.fetchall()
+        """Получение списка оборудования"""
+        try:
+            if category and category != 'Все' and category is not None:
+                self.cursor.execute('''
+                    SELECT * FROM equipment WHERE category = ? AND stock > 0
+                    ORDER BY category, name
+                ''', (category,))
+            else:
+                self.cursor.execute('''
+                    SELECT * FROM equipment WHERE stock > 0
+                    ORDER BY category, name
+                ''')
+
+            equipment = self.cursor.fetchall()
+            print(f"Загружено {len(equipment)} позиций оборудования")  # Отладочное сообщение
+            return equipment
+        except Exception as e:
+            print(f"Ошибка при загрузке оборудования: {e}")
+            return []
 
     def get_categories(self):
         self.cursor.execute('SELECT DISTINCT category FROM equipment')
